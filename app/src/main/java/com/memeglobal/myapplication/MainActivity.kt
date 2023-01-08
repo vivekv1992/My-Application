@@ -4,43 +4,53 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.ListPopupWindow
+import com.memeglobal.myapplication.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var spinner: Spinner
-    private  var textView: TextView? = null
-//    private var items = arrayOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
-//    private var selectedItems = ArrayList<String>()
+    lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        spinner = findViewById(R.id.spinner)
-        val items = arrayOf("vivek", "vicky", "veer", "vv", "vk")
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setUpPopUp()
+    }
 
-        val adapter = CheckboxArrayAdapter(this, R.layout.spinner_items, items)
-        spinner.adapter = adapter
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val selectedItems = mutableListOf<String>()
-                for (i in 0 until parent.count) {
-                    val itemView = parent.getChildAt(i)
-                    if (itemView != null) {
-                        val checkBox = itemView.findViewById<CheckBox>(R.id.checkbox)
-                        if (checkBox.isChecked) {
-                            selectedItems.add(checkBox.text.toString())
-
-                        }
-                    }
-                }
-                textView?.text = selectedItems.joinToString(", ")
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {}
+    private fun setUpPopUp() {
+        val listPopupWindowButton = binding.menu
+        val listPopupWindow = ListPopupWindow(this, null, androidx.appcompat.R.attr.popupWindowStyle)
+        listPopupWindow.setBackgroundDrawable(AppCompatResources.getDrawable(this, R.drawable.bg_bottom_popup_white))
+        listPopupWindow.anchorView = listPopupWindowButton
+        val items = arrayOf(
+            User("arun", false),
+            User("anand", false),
+            User("vivek", false),
+            User("messi", false),
+            User("cr7", false)
+        )
+        val adapter = MovieAdapter(this, items.toList()) {
+            val data = items.filter(User::selected).joinToString() { it.name }
+            binding.message.setText(data)
         }
+        listPopupWindow.setAdapter(adapter)
+        listPopupWindow.setOnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
 
+
+        }
+        var isShowing = false
+        listPopupWindowButton.setEndIconOnClickListener { v: View? ->
+            println("setEndIconOnClickListener")
+            if (isShowing) {
+                listPopupWindow.dismiss()
+            } else {
+                listPopupWindow.show()
+            }
+            isShowing = !isShowing
+        }
     }
 }
 
